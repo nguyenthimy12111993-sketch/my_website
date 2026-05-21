@@ -10,23 +10,27 @@ app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"]
 )
 
-# 👇【关键修改】获取当前 main.py 所在的绝对路径
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# 在这里定义本地管理员密码
+ADMIN_PASSWORD = "521478"
 
 @app.get("/")
 def read_root():
-    # 精准拼接出 index.html 的绝对路径
     html_path = os.path.join(BASE_DIR, "index.html")
     
     if os.path.exists(html_path):
         return FileResponse(html_path)
     else:
-        # 如果还是找不到，会在网页上把错误路径打印出来，方便我们查错
         return HTMLResponse(f"<h2>出错了：找不到网页文件</h2><p>Python 去这个路径找了：<br>{html_path}</p><p>请检查这个路径下有没有 index.html 文件！</p>")
 
 @app.get("/api/search")
-def search_students(keyword: str = Query("")):
-    # 同样精准定位 data.json
+def search_students(keyword: str = Query(""), password: str = Query("")):
+    
+    # 在查询文件前先验证密码
+    if password != ADMIN_PASSWORD:
+        return {"status": "error", "message": "管理员密码错误，拒绝访问！"}
+
     data_file = os.path.join(BASE_DIR, 'data.json')
     
     if not os.path.exists(data_file):

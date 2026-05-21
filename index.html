@@ -51,13 +51,22 @@
             </h1>
         </div>
 
-        <div class="w-full max-w-[584px] relative group transition-all duration-500 z-20" id="searchBoxContainer">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 text-gray-400"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"></path></svg>
+        <div class="w-full max-w-[584px] transition-all duration-500 z-20 flex flex-col gap-4" id="searchBoxContainer">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 text-gray-400"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z" fill="currentColor"></path></svg>
+                </div>
+                <input type="text" id="keywordInput" placeholder="输入学生姓名或学号进行查询" 
+                       class="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-full hover:shadow-[0_1px_6px_rgba(32,33,36,.28)] hover:border-transparent focus:shadow-[0_1px_6px_rgba(32,33,36,.28)] focus:border-transparent focus:outline-none text-base transition-all duration-200">
             </div>
-            
-            <input type="text" id="keywordInput" placeholder="输入学生姓名或学号进行查询" 
-                   class="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-full hover:shadow-[0_1px_6px_rgba(32,33,36,.28)] hover:border-transparent focus:shadow-[0_1px_6px_rgba(32,33,36,.28)] focus:border-transparent focus:outline-none text-base transition-all duration-200">
+
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <input type="password" id="passwordInput" placeholder="请输入管理员密码" 
+                       class="block w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-full hover:shadow-[0_1px_6px_rgba(32,33,36,.28)] hover:border-transparent focus:shadow-[0_1px_6px_rgba(32,33,36,.28)] focus:border-transparent focus:outline-none text-base transition-all duration-200">
+            </div>
         </div>
 
         <div class="flex justify-center gap-3 mt-7 transition-opacity duration-300" id="searchButtons">
@@ -185,9 +194,11 @@
             const resultsArea = document.getElementById('resultsArea');
             const backButtonContainer = document.getElementById('backButtonContainer');
             const keywordInput = document.getElementById('keywordInput');
+            const passwordInput = document.getElementById('passwordInput');
 
-            // 清空搜索框
+            // 清空搜索框和密码框
             keywordInput.value = '';
+            passwordInput.value = '';
 
             // 恢复高度居中
             mainContainer.classList.remove('justify-start', 'pt-8', 'sm:pt-12');
@@ -198,8 +209,8 @@
             logoTitle.classList.add('text-5xl', 'sm:text-6xl');
 
             // 恢复显示初始选项，隐藏结果区和返回按钮
-            learnMoreSection.style.display = ''; // 清除内联样式恢复 Grid
-            searchButtons.style.display = '';    // 清除内联样式恢复 Flex
+            learnMoreSection.style.display = ''; 
+            searchButtons.style.display = '';    
             
             backButtonContainer.classList.add('hidden');
             backButtonContainer.classList.remove('flex');
@@ -208,9 +219,17 @@
 
         async function handleSearch() {
             const keyword = document.getElementById('keywordInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
             const resultsArea = document.getElementById('resultsArea');
             
-            if (!keyword) return;
+            if (!keyword) {
+                alert("请输入查询关键词！");
+                return;
+            }
+            if (!password) {
+                alert("请输入管理员密码！");
+                return;
+            }
 
             // 触发排版变换动效
             switchToSearchLayout();
@@ -224,10 +243,23 @@
 
             try {
                 const queryParams = encodeURIComponent(keyword);
-                // 修改点：去掉了 http://127.0.0.1:8000，直接使用相对路径请求当前服务器的接口
-                const response = await fetch('/api/search?keyword=' + queryParams);
+                const pwdParam = encodeURIComponent(password);
+                const response = await fetch(`/api/search?keyword=${queryParams}&password=${pwdParam}`);
                 const resData = await response.json();
 
+                // 优先判断后端是不是返回了报错（例如密码错误）
+                if (resData.status === "error") {
+                    resultsArea.innerHTML = `
+                        <div class="py-8 px-5 bg-white rounded-2xl border border-red-100 text-center">
+                            <div class="text-red-500 text-4xl mb-3">⚠️</div>
+                            <p class="text-red-600 font-bold text-lg mb-1">访问被拒绝</p>
+                            <p class="text-gray-600 text-sm">${resData.message}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 密码正确，开始渲染数据
                 if (resData.status === "success" && resData.data.length > 0) {
                     currentStudentsData = resData.data;
                     resultsArea.innerHTML = renderCards(currentStudentsData);
@@ -304,6 +336,9 @@
 
         // 敲击回车键触发搜索
         document.getElementById('keywordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') handleSearch();
+        });
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') handleSearch();
         });
     </script>
