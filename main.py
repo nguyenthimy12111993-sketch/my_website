@@ -24,12 +24,20 @@ def read_root():
     else:
         return HTMLResponse(f"<h2>出错了：找不到网页文件</h2><p>Python 去这个路径找了：<br>{html_path}</p><p>请检查这个路径下有没有 index.html 文件！</p>")
 
+# 👇 新增：专门用于登录验证的接口
+@app.get("/api/login")
+def verify_login(password: str = Query("")):
+    if password == ADMIN_PASSWORD:
+        return {"status": "success", "message": "登录成功"}
+    else:
+        return {"status": "error", "message": "管理员密码错误，拒绝访问！"}
+
 @app.get("/api/search")
 def search_students(keyword: str = Query(""), password: str = Query("")):
     
-    # 在查询文件前先验证密码
+    # 每次查询时，后台依旧验证密码，确保接口不被恶意直接调用
     if password != ADMIN_PASSWORD:
-        return {"status": "error", "message": "管理员密码错误，拒绝访问！"}
+        return {"status": "error", "message": "管理员权限已失效或密码错误！"}
 
     data_file = os.path.join(BASE_DIR, 'data.json')
     
