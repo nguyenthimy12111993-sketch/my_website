@@ -1,0 +1,38 @@
+[
+    {
+        "name": "张伟",
+        "student_id": "2023040101",
+        "school": "桂林电子科技大学",
+        "dormitory": "花江校区 13栋",
+        "grade": "大三"
+    },
+    {
+        "name": "李娜",
+        "student_id": "2024050203",
+        "school": "广西师范大学",
+        "dormitory": "雁山校区 8栋",
+        "grade": "大二"
+    },
+    {
+        "name": "王强",
+        "student_id": "2022010155",
+        "school": "桂林理工大学",
+        "dormitory": "屏风校区 2栋",
+        "grade": "大四"
+    },
+    {
+        "name": "陈明",
+        "student_id": "2025060899",
+        "school": "桂林电子科技大学",
+        "dormitory": "金鸡岭校区 5栋",
+        "grade": "大一"
+    },
+    {
+        "name": "陈木木",
+        "student_id": "20250222299",
+        "school": "桂林电子科技大学",
+        "dormitory": "金鸡岭校区 99栋",
+        "grade": "大一"
+    }
+
+]
