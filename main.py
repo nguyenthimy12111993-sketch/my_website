@@ -12,7 +12,7 @@ app.add_middleware(
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# 在这里定义本地管理员密码
+
 ADMIN_PASSWORD = "521478"
 
 @app.get("/")
@@ -24,7 +24,7 @@ def read_root():
     else:
         return HTMLResponse(f"<h2>出错了：找不到网页文件</h2><p>Python 去这个路径找了：<br>{html_path}</p><p>请检查这个路径下有没有 index.html 文件！</p>")
 
-# 👇 新增：专门用于登录验证的接口
+
 @app.get("/api/login")
 def verify_login(password: str = Query("")):
     if password == ADMIN_PASSWORD:
