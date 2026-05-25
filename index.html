@@ -707,17 +707,15 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ========== Detail Sheet (bottom sheet) — FIXED ========== */
+        /* ========== Detail Sheet (bottom sheet) ========== */
         #detailModal {
             position: fixed;
             inset: 0;
             z-index: 100;
-            visibility: hidden;
             pointer-events: none;
         }
 
         #detailModal.show {
-            visibility: visible;
             pointer-events: auto;
         }
 
@@ -1189,8 +1187,13 @@
             document.getElementById('modalGrade').textContent  = student.grade;
 
             const modal = document.getElementById('detailModal');
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
+            // Force layout so browser registers the initial (hidden) transform as the transition start point
+            void modal.offsetHeight;
+
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            });
         }
 
         let modalAnimating = false;
