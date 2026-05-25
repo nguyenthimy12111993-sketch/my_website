@@ -2,289 +2,946 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <title>学生信息查询系统</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            background-color: #f8f9fa; /* 登录页背景色 */
+        /* ========== CSS Reset & Design Tokens ========== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ios-blue:        #007AFF;
+            --ios-blue-hover:  #0062CC;
+            --ios-red:         #FF3B30;
+            --ios-green:       #34C759;
+            --ios-orange:      #FF9500;
+            --ios-bg:          #F2F2F7;
+            --ios-card:        #FFFFFF;
+            --ios-separator:   rgba(60, 60, 67, 0.10);
+            --ios-text:        #1C1C1E;
+            --ios-secondary:   #8E8E93;
+            --ios-fill:        #E5E5EA;
+            --ios-nav-blur:    rgba(242, 242, 247, 0.72);
+            --nav-height:      56px;
         }
-        
-        .fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(12px); }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-        .modal-enter { animation: modalPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes modalPop { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: var(--ios-bg);
+            color: var(--ios-text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        /* ========== Login Screen ========== */
+        #loginScreen {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: var(--ios-bg);
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--ios-card);
+            border-radius: 20px;
+            padding: 44px 32px 36px;
+            box-shadow: 0 2px 24px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.04);
+            text-align: center;
+        }
+
+        .login-icon {
+            width: 68px;
+            height: 68px;
+            background: linear-gradient(135deg, #007AFF18, #5856D618);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 22px;
+            color: var(--ios-blue);
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+            color: var(--ios-text);
+        }
+
+        .login-subtitle {
+            font-size: 15px;
+            color: var(--ios-secondary);
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        .ios-input-group {
+            text-align: left;
+            margin-bottom: 8px;
+        }
+
+        .ios-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 17px;
+            font-family: inherit;
+            background: var(--ios-fill);
+            border: none;
+            border-radius: 12px;
+            color: var(--ios-text);
+            outline: none;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .ios-input::placeholder { color: #C7C7CC; }
+
+        .ios-input:focus {
+            background: var(--ios-card);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.18);
+        }
+
+        #loginError {
+            color: var(--ios-red);
+            font-size: 13px;
+            text-align: left;
+            padding-left: 4px;
+            height: 20px;
+            margin-bottom: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .ios-btn-primary {
+            width: 100%;
+            padding: 15px 24px;
+            font-size: 17px;
+            font-weight: 600;
+            font-family: inherit;
+            color: #FFF;
+            background: var(--ios-blue);
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .ios-btn-primary:active {
+            transform: scale(0.98);
+            background: var(--ios-blue-hover);
+        }
+
+        .ios-btn-primary:disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* ========== Navigation Bar (frosted glass) ========== */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: var(--ios-nav-blur);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid var(--ios-separator);
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            color: var(--ios-text);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--ios-blue);
+            color: #FFF;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .nav-avatar:active { opacity: 0.7; }
+
+        .nav-link {
+            font-size: 17px;
+            color: var(--ios-blue);
+            text-decoration: none;
+            font-weight: 400;
+            transition: opacity 0.2s;
+        }
+
+        .nav-link:active { opacity: 0.6; }
+
+        /* ========== Main Content ========== */
+        #appContent {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: none;
+            flex-direction: column;
+            background: var(--ios-bg);
+        }
+
+        #appContent.show { display: flex; }
+
+        #mainContainer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: justify-content 0.5s cubic-bezier(0.32, 0.72, 0, 1),
+                        padding-top 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        #mainContainer.search-active {
+            justify-content: flex-start;
+            padding-top: 24px;
+        }
+
+        /* ========== Logo ========== */
+        #logoContainer {
+            text-align: center;
+            margin-bottom: 32px;
+            transition: all 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        #logoTitle {
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            transition: font-size 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        #logoTitle.small {
+            font-size: 24px;
+        }
+
+        .logo-char { display: inline-block; }
+        .logo-char:nth-child(1) { color: #007AFF; }
+        .logo-char:nth-child(2) { color: #FF3B30; }
+        .logo-char:nth-child(3) { color: #FF9500; }
+        .logo-char:nth-child(4) { color: #007AFF; }
+        .logo-char:nth-child(5) { color: #34C759; }
+        .logo-char:nth-child(6) { color: #FF3B30; }
+        .logo-char:nth-child(7) { color: #FF9500; }
+        .logo-char:nth-child(8) { color: #34C759; }
+
+        /* ========== Search Bar ========== */
+        #searchBoxContainer {
+            width: 100%;
+            max-width: 540px;
+            transition: all 0.35s ease;
+            z-index: 10;
+        }
+
+        .ios-search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--ios-fill);
+            border-radius: 12px;
+            padding: 0 14px;
+            height: 44px;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .ios-search-bar:focus-within {
+            background: var(--ios-card);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.18);
+        }
+
+        .ios-search-bar svg {
+            flex-shrink: 0;
+            color: var(--ios-secondary);
+        }
+
+        .ios-search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 17px;
+            font-family: inherit;
+            color: var(--ios-text);
+            padding: 0 10px;
+            height: 100%;
+        }
+
+        .ios-search-input::placeholder { color: #C7C7CC; }
+
+        /* ========== Buttons ========== */
+        #searchButtons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            transition: opacity 0.3s;
+        }
+
+        .ios-btn-secondary {
+            padding: 10px 28px;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: inherit;
+            color: var(--ios-blue);
+            background: var(--ios-card);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+
+        .ios-btn-secondary:active {
+            background: #E5E5EA;
+            transform: scale(0.97);
+        }
+
+        /* ========== Learn More Cards ========== */
+        #learnMoreSection {
+            width: 100%;
+            max-width: 540px;
+            margin-top: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            transition: opacity 0.4s, transform 0.4s;
+        }
+
+        @media (max-width: 480px) {
+            #learnMoreSection { grid-template-columns: 1fr; }
+        }
+
+        .ios-info-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            background: var(--ios-card);
+            border-radius: 14px;
+            text-decoration: none;
+            color: var(--ios-text);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            transition: all 0.2s;
+        }
+
+        .ios-info-card:active {
+            transform: scale(0.98);
+            background: #F9F9FB;
+        }
+
+        .ios-info-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .ios-info-icon.blue  { background: #007AFF15; }
+        .ios-info-icon.green { background: #34C75915; }
+
+        .ios-info-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--ios-text);
+            margin-bottom: 2px;
+        }
+
+        .ios-info-desc {
+            font-size: 13px;
+            color: var(--ios-secondary);
+        }
+
+        /* ========== Back Button ========== */
+        #backButtonContainer {
+            width: 100%;
+            max-width: 540px;
+            margin-top: 20px;
+            display: none;
+            transition: all 0.3s;
+        }
+
+        #backButtonContainer.show { display: flex; }
+
+        .ios-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 17px;
+            font-family: inherit;
+            color: var(--ios-blue);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 4px;
+            transition: opacity 0.2s;
+        }
+
+        .ios-back-btn:active { opacity: 0.6; }
+
+        /* ========== Results ========== */
+        #resultsArea {
+            width: 100%;
+            max-width: 540px;
+            margin-top: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        #resultsArea.show { display: flex; }
+
+        .result-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--ios-card);
+            cursor: pointer;
+            transition: background 0.15s;
+            animation: rowFadeIn 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        .result-card:first-child { border-radius: 14px 14px 0 0; }
+        .result-card:last-child  { border-radius: 0 0 14px 14px; }
+        .result-card:only-child  { border-radius: 14px; }
+
+        .result-card:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 68px;
+            right: 0;
+            height: 0.5px;
+            background: var(--ios-separator);
+        }
+
+        .result-card {
+            position: relative;
+        }
+
+        .result-card:active { background: #F5F5F7; }
+
+        @keyframes rowFadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #FFF;
+            flex-shrink: 0;
+        }
+
+        .result-avatar.c0 { background: #007AFF; }
+        .result-avatar.c1 { background: #FF9500; }
+        .result-avatar.c2 { background: #34C759; }
+        .result-avatar.c3 { background: #FF3B30; }
+        .result-avatar.c4 { background: #AF52DE; }
+
+        .result-info { flex: 1; margin-left: 14px; }
+
+        .result-name {
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--ios-text);
+            letter-spacing: -0.2px;
+        }
+
+        .result-detail {
+            font-size: 14px;
+            color: var(--ios-secondary);
+            margin-top: 2px;
+        }
+
+        .result-chevron {
+            color: #C7C7CC;
+            flex-shrink: 0;
+        }
+
+        /* ========== Empty / Error / Loading States ========== */
+        .state-box {
+            background: var(--ios-card);
+            border-radius: 14px;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .state-box .state-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .state-box .state-title {
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .state-box .state-desc {
+            font-size: 15px;
+            color: var(--ios-secondary);
+            line-height: 1.5;
+        }
+
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid #E5E5EA;
+            border-top-color: var(--ios-blue);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========== Detail Sheet (bottom sheet modal) ========== */
+        #detailModal {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            align-items: flex-end;
+        }
+
+        #detailModal.show { display: flex; }
+
+        .sheet-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            transition: opacity 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        #detailModal.show .sheet-overlay { opacity: 1; }
+
+        .sheet-content {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--ios-card);
+            border-radius: 20px 20px 0 0;
+            padding: 8px 0 36px;
+            transform: translateY(100%);
+            transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        #detailModal.show .sheet-content { transform: translateY(0); }
+
+        .sheet-handle {
+            width: 36px;
+            height: 5px;
+            background: #D1D1D6;
+            border-radius: 3px;
+            margin: 0 auto 20px;
+        }
+
+        .sheet-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--ios-fill);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--ios-secondary);
+            transition: background 0.2s;
+            z-index: 2;
+        }
+
+        .sheet-close-btn:active { background: #D1D1D6; }
+
+        .sheet-avatar-lg {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: 600;
+            color: #FFF;
+            background: var(--ios-blue);
+            margin: 0 auto 12px;
+        }
+
+        .sheet-name {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin-bottom: 2px;
+        }
+
+        .sheet-id {
+            text-align: center;
+            font-size: 15px;
+            color: var(--ios-secondary);
+            margin-bottom: 24px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sheet-info-list {
+            margin: 0 20px;
+            background: #F9F9FB;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .sheet-info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+        }
+
+        .sheet-info-row:not(:last-child) {
+            border-bottom: 0.5px solid var(--ios-separator);
+        }
+
+        .sheet-info-label {
+            font-size: 15px;
+            color: var(--ios-secondary);
+        }
+
+        .sheet-info-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--ios-text);
+            text-align: right;
+            max-width: 60%;
+        }
+
+        /* ========== Footer ========== */
+        .ios-footer {
+            background: var(--ios-nav-blur);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-top: 0.5px solid var(--ios-separator);
+            padding: 16px 20px;
+            text-align: center;
+            margin-top: auto;
+            font-size: 13px;
+            color: var(--ios-secondary);
+        }
+
+        .ios-footer a {
+            color: var(--ios-blue);
+            text-decoration: none;
+        }
+
+        .ios-footer a:active { opacity: 0.6; }
+
+        /* ========== Utility ========== */
+        .hidden-el { display: none !important; }
     </style>
 </head>
-<body class="text-gray-800 relative overflow-x-hidden">
+<body>
 
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center px-4 w-full z-50 transition-opacity duration-500">
-        <div class="w-full max-w-[400px] bg-white p-8 sm:p-10 rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 text-center">
-            <div class="w-16 h-16 bg-[#e8f0fe] rounded-full flex items-center justify-center mx-auto mb-5 text-[#1a73e8]">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+    <!-- ==================== Login Screen ==================== -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <div class="login-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    <circle cx="12" cy="16" r="1"/>
+                </svg>
             </div>
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">管理员访问</h2>
-            <p class="text-sm text-gray-500 mb-8">系统包含内部数据，请先验证身份</p>
-            
-            <div class="relative text-left mb-3">
-                <input type="password" id="loginPasswordInput" placeholder="请输入管理员密码" 
-                       class="block w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:shadow-[0_0_0_2px_rgba(26,115,232,0.2)] focus:border-[#1a73e8] focus:outline-none text-base transition-all duration-200">
+            <h2 class="login-title">管理员验证</h2>
+            <p class="login-subtitle">此系统包含内部学生数据，请输入密码以继续</p>
+
+            <div class="ios-input-group">
+                <input type="password" id="loginPasswordInput" class="ios-input" placeholder="输入管理员密码" autocomplete="off">
             </div>
-            
-            <div id="loginError" class="text-red-500 text-sm text-left pl-2 h-5 mb-5 opacity-0 transition-opacity font-medium">密码错误，请重试</div>
-            
-            <button onclick="handleLogin()" id="loginBtn" class="w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white font-medium py-3.5 rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2">
-                进入系统
-            </button>
+            <div id="loginError">密码错误，请重试</div>
+
+            <button onclick="handleLogin()" id="loginBtn" class="ios-btn-primary">进入系统</button>
         </div>
     </div>
 
-    <div id="appContent" class="hidden min-h-screen flex-col bg-white">
-        
-        <div class="flex justify-end p-4 text-sm gap-4 items-center h-14">
-            <a href="#" class="text-gray-700 hover:underline">关于</a>
-            <a href="#" class="text-gray-700 hover:underline">学术空间</a>
-            <div class="w-8 h-8 bg-blue-600 rounded-full text-white flex items-center justify-center font-medium shadow-sm cursor-pointer hover:bg-blue-700 transition-colors">Admin</div>
-        </div>
+    <!-- ==================== Main App ==================== -->
+    <div id="appContent">
 
-        <main id="mainContainer" class="flex-grow flex flex-col justify-center items-center px-4 transition-all duration-700 ease-in-out w-full pb-32">
-            
-            <div id="logoContainer" class="text-center mb-8 transition-all duration-700">
-                <h1 id="logoTitle" class="text-5xl sm:text-6xl font-extrabold tracking-tight transition-all duration-700">
-                    <span class="text-[#4285f4]">学</span><span class="text-[#ea4335]">生</span><span class="text-[#fbbc05]">信</span><span class="text-[#4285f4]">息</span><span class="text-[#34a853]">查</span><span class="text-[#ea4335]">询</span><span class="text-[#fbbc05]">系</span><span class="text-[#34a853]">统</span>
+        <!-- Navigation Bar -->
+        <nav class="nav-bar">
+            <a href="#" class="nav-link">关于</a>
+            <span class="nav-title">学生信息</span>
+            <div class="nav-avatar" title="管理员">A</div>
+        </nav>
+
+        <!-- Main Content -->
+        <main id="mainContainer">
+
+            <!-- Logo / Title -->
+            <div id="logoContainer">
+                <h1 id="logoTitle">
+                    <span class="logo-char">学</span><span class="logo-char">生</span><span class="logo-char">信</span><span class="logo-char">息</span><span class="logo-char">查</span><span class="logo-char">询</span><span class="logo-char">系</span><span class="logo-char">统</span>
                 </h1>
             </div>
 
-            <div class="w-full max-w-[584px] relative group transition-all duration-500 z-20" id="searchBoxContainer">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 text-gray-400"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z" fill="currentColor"></path></svg>
+            <!-- Search Bar -->
+            <div id="searchBoxContainer">
+                <div class="ios-search-bar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <input type="text" id="keywordInput" class="ios-search-input" placeholder="搜索学生姓名或学号" autocomplete="off">
                 </div>
-                <input type="text" id="keywordInput" placeholder="输入学生姓名或学号进行查询" 
-                       class="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-full hover:shadow-[0_1px_6px_rgba(32,33,36,.28)] hover:border-transparent focus:shadow-[0_1px_6px_rgba(32,33,36,.28)] focus:border-transparent focus:outline-none text-base transition-all duration-200">
             </div>
 
-            <div class="flex justify-center gap-3 mt-7 transition-opacity duration-300" id="searchButtons">
-                <button onclick="handleSearch()" class="bg-[#f8f9fa] border border-[#f8f9fa] hover:border-gray-300 hover:shadow-sm text-gray-800 text-sm px-6 py-2 rounded focus:outline-none transition-all">搜 索</button>
+            <!-- Search Button (initial state) -->
+            <div id="searchButtons">
+                <button onclick="handleSearch()" class="ios-btn-secondary">搜索</button>
             </div>
 
-            <div id="learnMoreSection" class="w-full max-w-[584px] mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-500">
-                <a href="https://www.guet.edu.cn" target="_blank" class="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all group">
-                    <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-4 group-hover:bg-blue-100 transition-colors">
-                        <span class="text-xl">🏫</span>
-                    </div>
+            <!-- Info Cards (initial state) -->
+            <div id="learnMoreSection">
+                <a href="https://www.guet.edu.cn" target="_blank" class="ios-info-card">
+                    <div class="ios-info-icon blue">🏫</div>
                     <div>
-                        <h3 class="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">桂林电子科技大学</h3>
-                        <p class="text-xs text-gray-500 mt-0.5">访问官方网站了解更多</p>
+                        <div class="ios-info-title">桂林电子科技大学</div>
+                        <div class="ios-info-desc">访问官方网站</div>
                     </div>
                 </a>
-                <a href="https://www.google.com" target="_blank" class="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all group">
-                    <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mr-4 group-hover:bg-green-100 transition-colors">
-                        <span class="text-xl">🔍</span>
-                    </div>
+                <a href="https://www.google.com" target="_blank" class="ios-info-card">
+                    <div class="ios-info-icon green">🌐</div>
                     <div>
-                        <h3 class="text-sm font-semibold text-gray-800 group-hover:text-green-600 transition-colors">Google 搜索</h3>
-                        <p class="text-xs text-gray-500 mt-0.5">跳转到全球最大搜索引擎</p>
+                        <div class="ios-info-title">Google 搜索</div>
+                        <div class="ios-info-desc">全球搜索引擎</div>
                     </div>
                 </a>
             </div>
 
-            <div id="backButtonContainer" class="w-full max-w-[584px] mt-6 hidden justify-start transition-all duration-300">
-                <button onclick="resetSearch()" class="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <!-- Back Button (results state) -->
+            <div id="backButtonContainer">
+                <button onclick="resetSearch()" class="ios-back-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
                     返回
                 </button>
             </div>
 
-            <div id="resultsArea" class="w-full max-w-[584px] mt-2 flex flex-col gap-3 hidden"></div>
+            <!-- Results Area -->
+            <div id="resultsArea"></div>
+
         </main>
 
-        <footer class="bg-[#f2f2f2] text-[#70757a] text-sm mt-auto z-10">
-            <div class="px-6 py-3 border-b border-[#dadce0]">中国</div>
-            <div class="px-6 py-3 flex flex-col sm:flex-row justify-between items-center">
-                <div class="flex gap-6 mb-3 sm:mb-0">
-                    <a href="#" class="hover:text-gray-800 transition-colors">关于系统</a>
-                </div>
-                <div class="flex gap-6">
-                    <a href="https://www.baidu.com" target="_blank" class="font-medium text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1 group">
-                        <span>遇到问题？我来给你百度一下</span>
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </a>
-                </div>
-            </div>
+        <!-- Footer -->
+        <footer class="ios-footer">
+            <a href="https://www.baidu.com" target="_blank">遇到问题？用百度搜索 →</a>
         </footer>
     </div>
 
-    <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
-        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden modal-enter">
-            <div class="absolute top-4 right-4">
-                <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            
-            <div class="p-8 text-center pt-10">
-                <div id="modalAvatar" class="w-20 h-20 mx-auto bg-[#e8f0fe] text-[#1a73e8] rounded-full flex items-center justify-center text-3xl font-bold mb-4"></div>
-                <h3 id="modalName" class="text-2xl font-bold text-gray-900 mb-1"></h3>
-                <p id="modalId" class="text-[#70757a] font-mono text-sm mb-6"></p>
-                
-                <div class="space-y-3 text-left">
-                    <div class="bg-gray-50 p-4 rounded-2xl flex items-center justify-between border border-gray-100">
-                        <span class="text-gray-500 text-sm font-medium">🏫 学校</span>
-                        <span id="modalSchool" class="text-gray-900 font-medium text-sm"></span>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-2xl flex items-center justify-between border border-gray-100">
-                        <span class="text-gray-500 text-sm font-medium">🏢 宿舍</span>
-                        <span id="modalDorm" class="text-gray-900 font-medium text-sm"></span>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-2xl flex items-center justify-between border border-gray-100">
-                        <span class="text-gray-500 text-sm font-medium">📚 年级</span>
-                        <span id="modalGrade" class="text-gray-900 font-medium text-sm"></span>
-                    </div>
+    <!-- ==================== Detail Sheet (Bottom Sheet) ==================== -->
+    <div id="detailModal">
+        <div class="sheet-overlay" onclick="closeModal()"></div>
+        <div class="sheet-content">
+            <div class="sheet-handle"></div>
+            <button class="sheet-close-btn" onclick="closeModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+            </button>
+
+            <div id="modalAvatar" class="sheet-avatar-lg"></div>
+            <div id="modalName" class="sheet-name"></div>
+            <div id="modalId" class="sheet-id"></div>
+
+            <div class="sheet-info-list">
+                <div class="sheet-info-row">
+                    <span class="sheet-info-label">学校</span>
+                    <span id="modalSchool" class="sheet-info-value"></span>
+                </div>
+                <div class="sheet-info-row">
+                    <span class="sheet-info-label">宿舍</span>
+                    <span id="modalDorm" class="sheet-info-value"></span>
+                </div>
+                <div class="sheet-info-row">
+                    <span class="sheet-info-label">年级</span>
+                    <span id="modalGrade" class="sheet-info-value"></span>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- ==================== JavaScript ==================== -->
     <script>
         let currentStudentsData = [];
-        let sessionPassword = ""; // 用于在内存中保存登录成功的密码
+        let sessionPassword = "";
 
-        // ========== 1. 登录验证逻辑 ==========
+        // ── Login ──────────────────────────────────────────
         async function handleLogin() {
             const pwdInput = document.getElementById('loginPasswordInput').value.trim();
             const errorMsg = document.getElementById('loginError');
-            const loginBtn = document.getElementById('loginBtn');
-            
+            const loginBtn  = document.getElementById('loginBtn');
+
             if (!pwdInput) {
-                errorMsg.textContent = "请输入密码！";
-                errorMsg.classList.remove('opacity-0');
+                errorMsg.textContent = "请输入密码";
+                errorMsg.style.opacity = '1';
                 return;
             }
 
-            // 变为加载状态
-            loginBtn.innerHTML = `<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> 验证中...`;
-            errorMsg.classList.add('opacity-0');
+            loginBtn.innerHTML = `<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> 验证中...`;
+            loginBtn.disabled = true;
+            errorMsg.style.opacity = '0';
 
             try {
                 const response = await fetch(`/api/login?password=${encodeURIComponent(pwdInput)}`);
                 const resData = await response.json();
 
                 if (resData.status === "success") {
-                    // 验证成功：保存密码，切换界面
                     sessionPassword = pwdInput;
-                    
+
                     const loginScreen = document.getElementById('loginScreen');
-                    const appContent = document.getElementById('appContent');
-                    
-                    // 淡出登录页，显示主界面
+                    const appContent  = document.getElementById('appContent');
+
                     loginScreen.style.opacity = '0';
                     setTimeout(() => {
                         loginScreen.style.display = 'none';
-                        appContent.classList.remove('hidden');
-                        appContent.classList.add('flex');
-                    }, 300);
+                        appContent.classList.add('show');
+                    }, 350);
 
                 } else {
-                    // 密码错误
-                    errorMsg.textContent = resData.message;
-                    errorMsg.classList.remove('opacity-0');
-                    loginBtn.innerHTML = `进入系统`;
+                    errorMsg.textContent = resData.message || "密码错误，请重试";
+                    errorMsg.style.opacity = '1';
+                    loginBtn.innerHTML = '进入系统';
+                    loginBtn.disabled = false;
                 }
             } catch (error) {
-                errorMsg.textContent = "无法连接到服务器，请确保 uvicorn 已运行";
-                errorMsg.classList.remove('opacity-0');
-                loginBtn.innerHTML = `进入系统`;
+                errorMsg.textContent = "无法连接服务器，请确认后端已启动";
+                errorMsg.style.opacity = '1';
+                loginBtn.innerHTML = '进入系统';
+                loginBtn.disabled = false;
             }
         }
 
-        // 监听回车登录
         document.getElementById('loginPasswordInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') handleLogin();
         });
 
-
-        // ========== 2. 搜索系统逻辑 ==========
+        // ── Search Layout Toggle ──────────────────────────
         function switchToSearchLayout() {
-            const mainContainer = document.getElementById('mainContainer');
-            const logoTitle = document.getElementById('logoTitle');
-            const learnMoreSection = document.getElementById('learnMoreSection');
-            const searchButtons = document.getElementById('searchButtons');
-            const resultsArea = document.getElementById('resultsArea');
-            const backButtonContainer = document.getElementById('backButtonContainer');
+            const mc = document.getElementById('mainContainer');
+            const lt = document.getElementById('logoTitle');
+            const ls = document.getElementById('learnMoreSection');
+            const sb = document.getElementById('searchButtons');
+            const bb = document.getElementById('backButtonContainer');
+            const ra = document.getElementById('resultsArea');
 
-            mainContainer.classList.remove('justify-center');
-            mainContainer.classList.add('justify-start', 'pt-8', 'sm:pt-12');
-            logoTitle.classList.remove('text-5xl', 'sm:text-6xl');
-            logoTitle.classList.add('text-3xl', 'sm:text-4xl');
-
-            learnMoreSection.style.display = 'none';
-            searchButtons.style.display = 'none';
-            
-            backButtonContainer.classList.remove('hidden');
-            backButtonContainer.classList.add('flex');
-            resultsArea.classList.remove('hidden');
+            mc.classList.add('search-active');
+            lt.classList.add('small');
+            ls.style.display = 'none';
+            sb.style.display = 'none';
+            bb.classList.add('show');
+            ra.classList.add('show');
         }
 
         function resetSearch() {
-            const mainContainer = document.getElementById('mainContainer');
-            const logoTitle = document.getElementById('logoTitle');
-            const learnMoreSection = document.getElementById('learnMoreSection');
-            const searchButtons = document.getElementById('searchButtons');
-            const resultsArea = document.getElementById('resultsArea');
-            const backButtonContainer = document.getElementById('backButtonContainer');
-            
+            const mc = document.getElementById('mainContainer');
+            const lt = document.getElementById('logoTitle');
+            const ls = document.getElementById('learnMoreSection');
+            const sb = document.getElementById('searchButtons');
+            const bb = document.getElementById('backButtonContainer');
+            const ra = document.getElementById('resultsArea');
+
             document.getElementById('keywordInput').value = '';
 
-            mainContainer.classList.remove('justify-start', 'pt-8', 'sm:pt-12');
-            mainContainer.classList.add('justify-center');
-            logoTitle.classList.remove('text-3xl', 'sm:text-4xl');
-            logoTitle.classList.add('text-5xl', 'sm:text-6xl');
-
-            learnMoreSection.style.display = ''; 
-            searchButtons.style.display = '';    
-            
-            backButtonContainer.classList.add('hidden');
-            backButtonContainer.classList.remove('flex');
-            resultsArea.classList.add('hidden');
+            mc.classList.remove('search-active');
+            lt.classList.remove('small');
+            ls.style.display = '';
+            sb.style.display = '';
+            bb.classList.remove('show');
+            ra.classList.remove('show');
+            ra.innerHTML = '';
         }
 
+        // ── Search ────────────────────────────────────────
         async function handleSearch() {
             const keyword = document.getElementById('keywordInput').value.trim();
             const resultsArea = document.getElementById('resultsArea');
-            
+
             if (!keyword) {
-                alert("请输入查询关键词！");
+                alert("请输入查询关键词");
                 return;
             }
 
             switchToSearchLayout();
-            
+
             resultsArea.innerHTML = `
-                <div class="flex items-center justify-center py-16">
-                    <div class="w-8 h-8 border-4 border-[#e8f0fe] border-t-[#1a73e8] rounded-full animate-spin"></div>
+                <div class="state-box">
+                    <div class="spinner" style="margin:0 auto 16px;"></div>
+                    <p class="state-desc" style="margin:0;">正在查询...</p>
                 </div>
             `;
 
             try {
-                const queryParams = encodeURIComponent(keyword);
-                // 这里自动带上保存在内存中的 sessionPassword 提交给后台
-                const pwdParam = encodeURIComponent(sessionPassword);
-                const response = await fetch(`/api/search?keyword=${queryParams}&password=${pwdParam}`);
-                const resData = await response.json();
+                const kw   = encodeURIComponent(keyword);
+                const pwd  = encodeURIComponent(sessionPassword);
+                const response = await fetch(`/api/search?keyword=${kw}&password=${pwd}`);
+                const resData  = await response.json();
 
                 if (resData.status === "error") {
                     resultsArea.innerHTML = `
-                        <div class="py-8 px-5 bg-white rounded-2xl border border-red-100 text-center">
-                            <p class="text-red-600 font-bold text-lg mb-1">数据获取失败</p>
-                            <p class="text-gray-600 text-sm">${resData.message}</p>
-                            <button onclick="location.reload()" class="mt-4 text-blue-500 underline text-sm">重新登录</button>
+                        <div class="state-box">
+                            <div class="state-icon">⚠️</div>
+                            <p class="state-title">获取数据失败</p>
+                            <p class="state-desc">${resData.message}</p>
+                            <button onclick="location.reload()" class="ios-back-btn" style="margin-top:12px;color:var(--ios-blue);">重新登录</button>
                         </div>
                     `;
                     return;
@@ -295,20 +952,19 @@
                     resultsArea.innerHTML = renderCards(currentStudentsData);
                 } else {
                     resultsArea.innerHTML = `
-                        <div class="py-8 px-5 bg-white rounded-2xl border border-gray-100">
-                            <p class="text-gray-800 text-base mb-3">找不到和您查询的 "<span class="font-bold">${keyword}</span>" 相符的学生信息。</p>
-                            <p class="text-[#70757a] text-sm mb-2">建议：</p>
-                            <ul class="text-[#70757a] text-sm list-disc pl-5 space-y-1">
-                                <li>请检查输入字词有无错误。</li>
-                                <li>请尝试使用如姓名、学号等其他查询词。</li>
-                            </ul>
+                        <div class="state-box">
+                            <div class="state-icon">📭</div>
+                            <p class="state-title">未找到结果</p>
+                            <p class="state-desc">找不到和 "<b>${keyword}</b>" 相符的学生信息<br>请检查输入，或尝试其他关键词</p>
                         </div>
                     `;
                 }
             } catch (error) {
                 resultsArea.innerHTML = `
-                    <div class="text-center py-16 text-red-500 bg-white rounded-2xl border border-gray-100">
-                        <p class="font-bold text-lg">无法连接到后端服务器</p>
+                    <div class="state-box">
+                        <div class="state-icon">❌</div>
+                        <p class="state-title">连接失败</p>
+                        <p class="state-desc">无法连接到后端服务器</p>
                     </div>
                 `;
             }
@@ -317,50 +973,50 @@
         function renderCards(dataArr) {
             return dataArr.map((item, index) => {
                 const actualIndex = currentStudentsData.indexOf(item);
-                const delay = (index * 0.05); 
+                const colorIdx = actualIndex % 5;
+                const delay = (index * 0.06);
                 return `
-                <div onclick="openModal(${actualIndex})" 
-                     class="fade-in-up cursor-pointer bg-white p-4 rounded-2xl border border-gray-100 hover:shadow-[0_2px_10px_rgba(32,33,36,0.08)] transition-all duration-300 flex items-center justify-between group"
-                     style="animation-delay: ${delay}s;">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-[#f1f3f4] text-[#1a73e8] rounded-full flex items-center justify-center text-xl font-bold group-hover:bg-[#e8f0fe] transition-colors">
-                            ${item.name.charAt(0)}
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-[#1a0dab] group-hover:underline">${item.name}</h3>
-                            <p class="text-[#4d5156] text-sm mt-0.5">学号: ${item.student_id}</p>
-                        </div>
+                <div onclick="openModal(${actualIndex})"
+                     class="result-card"
+                     style="animation-delay:${delay}s;">
+                    <div class="result-avatar c${colorIdx}">${item.name.charAt(0)}</div>
+                    <div class="result-info">
+                        <div class="result-name">${item.name}</div>
+                        <div class="result-detail">学号 ${item.student_id}</div>
                     </div>
-                    <div class="text-gray-400 group-hover:text-[#1a73e8] pr-2 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </div>
+                    <svg class="result-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
                 </div>
-            `}).join('');
+                `;
+            }).join('');
         }
 
+        // ── Detail Sheet ──────────────────────────────────
         function openModal(index) {
             const student = currentStudentsData[index];
             document.getElementById('modalAvatar').textContent = student.name.charAt(0);
-            document.getElementById('modalName').textContent = student.name;
-            document.getElementById('modalId').textContent = '学号: ' + student.student_id;
+            document.getElementById('modalName').textContent   = student.name;
+            document.getElementById('modalId').textContent     = '学号 ' + student.student_id;
             document.getElementById('modalSchool').textContent = student.school;
-            document.getElementById('modalDorm').textContent = student.dormitory;
-            document.getElementById('modalGrade').textContent = student.grade;
-            
+            document.getElementById('modalDorm').textContent   = student.dormitory;
+            document.getElementById('modalGrade').textContent  = student.grade;
+
             const modal = document.getElementById('detailModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
             const modal = document.getElementById('detailModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
         }
 
         document.getElementById('keywordInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') handleSearch();
         });
     </script>
+
 </body>
 </html>
