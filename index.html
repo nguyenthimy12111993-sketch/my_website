@@ -28,7 +28,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            background: var(--ios-bg);
+            background: #F0F0F5;
             color: var(--ios-text);
             min-height: 100vh;
             min-height: 100dvh;
@@ -36,25 +36,187 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* ========== Animated Wave Background ========== */
+        .bg-waves {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-waves .wave-layer {
+            position: absolute;
+            inset: 0;
+            opacity: 0.55;
+        }
+
+        /* Base gradient that shifts hue continuously */
+        .bg-waves .wave-layer.wave-base {
+            background: linear-gradient(
+                135deg,
+                #E8F0FE 0%,
+                #F0E6F6 25%,
+                #E6F3F8 50%,
+                #FCE8EC 75%,
+                #E8F0FE 100%
+            );
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease-in-out infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes gradientShift {
+            0%, 100%   { background-position: 0% 0%; }
+            25%        { background-position: 100% 0%; }
+            50%        { background-position: 100% 100%; }
+            75%        { background-position: 0% 100%; }
+        }
+
+        /* Floating blur blobs */
+        .bg-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            will-change: transform;
+        }
+
+        .bg-blob.blob-1 {
+            width: 460px;
+            height: 460px;
+            background: #007AFF;
+            opacity: 0.35;
+            animation: blobFloat1 14s ease-in-out infinite;
+        }
+
+        .bg-blob.blob-2 {
+            width: 380px;
+            height: 380px;
+            background: #AF52DE;
+            opacity: 0.30;
+            animation: blobFloat2 17s ease-in-out infinite;
+        }
+
+        .bg-blob.blob-3 {
+            width: 420px;
+            height: 420px;
+            background: #5AC8FA;
+            opacity: 0.35;
+            animation: blobFloat3 15s ease-in-out infinite;
+        }
+
+        .bg-blob.blob-4 {
+            width: 340px;
+            height: 340px;
+            background: #FF375F;
+            opacity: 0.22;
+            animation: blobFloat4 19s ease-in-out infinite;
+        }
+
+        .bg-blob.blob-5 {
+            width: 300px;
+            height: 300px;
+            background: #34C759;
+            opacity: 0.20;
+            animation: blobFloat5 21s ease-in-out infinite;
+        }
+
+        @keyframes blobFloat1 {
+            0%, 100% { transform: translate(5vw, 5vh) scale(1); }
+            25%      { transform: translate(55vw, 30vh) scale(1.15); }
+            50%      { transform: translate(70vw, 65vh) scale(0.9); }
+            75%      { transform: translate(15vw, 70vh) scale(1.1); }
+        }
+
+        @keyframes blobFloat2 {
+            0%, 100% { transform: translate(60vw, 10vh) scale(1.05); }
+            25%      { transform: translate(10vw, 45vh) scale(0.85); }
+            50%      { transform: translate(30vw, 75vh) scale(1.15); }
+            75%      { transform: translate(75vw, 55vh) scale(0.95); }
+        }
+
+        @keyframes blobFloat3 {
+            0%, 100% { transform: translate(40vw, 60vh) scale(0.9); }
+            25%      { transform: translate(65vw, 15vh) scale(1.1); }
+            50%      { transform: translate(10vw, 50vh) scale(1); }
+            75%      { transform: translate(50vw, 75vh) scale(0.85); }
+        }
+
+        @keyframes blobFloat4 {
+            0%, 100% { transform: translate(20vw, 50vh) scale(1); }
+            33%      { transform: translate(50vw, 10vh) scale(1.2); }
+            66%      { transform: translate(70vw, 60vh) scale(0.8); }
+        }
+
+        @keyframes blobFloat5 {
+            0%, 100% { transform: translate(70vw, 40vh) scale(0.95); }
+            50%      { transform: translate(15vw, 20vh) scale(1.1); }
+        }
+
+        /* Edge glow effect — simulates iOS Intelligence border glow */
+        .edge-glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .edge-glow::before,
+        .edge-glow::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.25;
+            animation: edgePulse 8s ease-in-out infinite;
+        }
+
+        .edge-glow::before {
+            width: 350px;
+            height: 350px;
+            background: #5856D6;
+            top: -120px;
+            right: -80px;
+            animation-delay: 0s;
+        }
+
+        .edge-glow::after {
+            width: 300px;
+            height: 300px;
+            background: #007AFF;
+            bottom: -100px;
+            left: -80px;
+            animation-delay: -4s;
+        }
+
+        @keyframes edgePulse {
+            0%, 100% { opacity: 0.20; transform: scale(1); }
+            50%      { opacity: 0.35; transform: scale(1.25); }
+        }
+
         /* ========== Login Screen ========== */
         #loginScreen {
+            position: relative;
+            z-index: 1;
             min-height: 100vh;
             min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px;
-            background: var(--ios-bg);
+            background: transparent;
             transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .login-card {
             width: 100%;
             max-width: 400px;
-            background: var(--ios-card);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: saturate(180%) blur(30px);
+            -webkit-backdrop-filter: saturate(180%) blur(30px);
             border-radius: 20px;
             padding: 44px 32px 36px;
-            box-shadow: 0 2px 24px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 32px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.06);
             text-align: center;
         }
 
@@ -95,7 +257,7 @@
             padding: 14px 16px;
             font-size: 17px;
             font-family: inherit;
-            background: var(--ios-fill);
+            background: rgba(229, 229, 234, 0.7);
             border: none;
             border-radius: 12px;
             color: var(--ios-text);
@@ -103,10 +265,10 @@
             transition: background 0.2s, box-shadow 0.2s;
         }
 
-        .ios-input::placeholder { color: #C7C7CC; }
+        .ios-input::placeholder { color: #AEAEB2; }
 
         .ios-input:focus {
-            background: var(--ios-card);
+            background: rgba(255, 255, 255, 0.9);
             box-shadow: 0 0 0 3px rgba(0,122,255,0.18);
         }
 
@@ -204,11 +366,13 @@
 
         /* ========== Main Content ========== */
         #appContent {
+            position: relative;
+            z-index: 1;
             min-height: 100vh;
             min-height: 100dvh;
             display: none;
             flex-direction: column;
-            background: var(--ios-bg);
+            background: transparent;
         }
 
         #appContent.show { display: flex; }
@@ -243,9 +407,7 @@
             transition: font-size 0.5s cubic-bezier(0.32, 0.72, 0, 1);
         }
 
-        #logoTitle.small {
-            font-size: 24px;
-        }
+        #logoTitle.small { font-size: 24px; }
 
         .logo-char { display: inline-block; }
         .logo-char:nth-child(1) { color: #007AFF; }
@@ -268,7 +430,9 @@
         .ios-search-bar {
             display: flex;
             align-items: center;
-            background: var(--ios-fill);
+            background: rgba(229, 229, 234, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 0 14px;
             height: 44px;
@@ -276,7 +440,7 @@
         }
 
         .ios-search-bar:focus-within {
-            background: var(--ios-card);
+            background: rgba(255, 255, 255, 0.85);
             box-shadow: 0 0 0 3px rgba(0,122,255,0.18);
         }
 
@@ -297,7 +461,7 @@
             height: 100%;
         }
 
-        .ios-search-input::placeholder { color: #C7C7CC; }
+        .ios-search-input::placeholder { color: #AEAEB2; }
 
         /* ========== Buttons ========== */
         #searchButtons {
@@ -314,7 +478,9 @@
             font-weight: 500;
             font-family: inherit;
             color: var(--ios-blue);
-            background: var(--ios-card);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: none;
             border-radius: 20px;
             cursor: pointer;
@@ -323,7 +489,7 @@
         }
 
         .ios-btn-secondary:active {
-            background: #E5E5EA;
+            background: rgba(229, 229, 234, 0.8);
             transform: scale(0.97);
         }
 
@@ -347,17 +513,19 @@
             align-items: center;
             gap: 14px;
             padding: 16px;
-            background: var(--ios-card);
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border-radius: 14px;
             text-decoration: none;
             color: var(--ios-text);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            box-shadow: 0 1px 6px rgba(0,0,0,0.04);
             transition: all 0.2s;
         }
 
         .ios-info-card:active {
             transform: scale(0.98);
-            background: #F9F9FB;
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .ios-info-icon {
@@ -426,11 +594,14 @@
         #resultsArea.show { display: flex; }
 
         .result-card {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 16px;
-            background: var(--ios-card);
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             cursor: pointer;
             transition: background 0.15s;
             animation: rowFadeIn 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
@@ -452,11 +623,7 @@
             background: var(--ios-separator);
         }
 
-        .result-card {
-            position: relative;
-        }
-
-        .result-card:active { background: #F5F5F7; }
+        .result-card:active { background: rgba(255, 255, 255, 0.95); }
 
         @keyframes rowFadeIn {
             to { opacity: 1; transform: translateY(0); }
@@ -503,16 +670,15 @@
 
         /* ========== Empty / Error / Loading States ========== */
         .state-box {
-            background: var(--ios-card);
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border-radius: 14px;
             padding: 32px 24px;
             text-align: center;
         }
 
-        .state-box .state-icon {
-            font-size: 40px;
-            margin-bottom: 12px;
-        }
+        .state-box .state-icon { font-size: 40px; margin-bottom: 12px; }
 
         .state-box .state-title {
             font-size: 19px;
@@ -529,7 +695,7 @@
         .spinner {
             width: 28px;
             height: 28px;
-            border: 3px solid #E5E5EA;
+            border: 3px solid rgba(229, 229, 234, 0.6);
             border-top-color: var(--ios-blue);
             border-radius: 50%;
             animation: spin 0.7s linear infinite;
@@ -538,16 +704,15 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ========== Detail Sheet (bottom sheet modal) ========== */
+        /* ========== Detail Sheet (bottom sheet) — FIXED ========== */
         #detailModal {
             position: fixed;
             inset: 0;
             z-index: 100;
             display: none;
-            align-items: flex-end;
         }
 
-        #detailModal.show { display: flex; }
+        #detailModal.show { display: block; }
 
         .sheet-overlay {
             position: absolute;
@@ -560,11 +725,16 @@
         #detailModal.show .sheet-overlay { opacity: 1; }
 
         .sheet-content {
-            position: relative;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
             width: 100%;
             max-width: 500px;
             margin: 0 auto;
-            background: var(--ios-card);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: saturate(180%) blur(30px);
+            -webkit-backdrop-filter: saturate(180%) blur(30px);
             border-radius: 20px 20px 0 0;
             padding: 8px 0 36px;
             transform: translateY(100%);
@@ -635,7 +805,7 @@
 
         .sheet-info-list {
             margin: 0 20px;
-            background: #F9F9FB;
+            background: rgba(249, 249, 251, 0.8);
             border-radius: 12px;
             overflow: hidden;
         }
@@ -683,12 +853,20 @@
         }
 
         .ios-footer a:active { opacity: 0.6; }
-
-        /* ========== Utility ========== */
-        .hidden-el { display: none !important; }
     </style>
 </head>
 <body>
+
+    <!-- ==================== Animated Wave Background ==================== -->
+    <div class="bg-waves">
+        <div class="wave-layer wave-base"></div>
+        <div class="bg-blob blob-1"></div>
+        <div class="bg-blob blob-2"></div>
+        <div class="bg-blob blob-3"></div>
+        <div class="bg-blob blob-4"></div>
+        <div class="bg-blob blob-5"></div>
+    </div>
+    <div class="edge-glow"></div>
 
     <!-- ==================== Login Screen ==================== -->
     <div id="loginScreen">
@@ -783,7 +961,7 @@
 
         <!-- Footer -->
         <footer class="ios-footer">
-            <a href="https://www.baidu.com" target="_blank">遇到问题？用百度搜索 →</a>
+            <a href="https://www.baidu.com" target="_blank">遇到问题？用百度搜索 &rarr;</a>
         </footer>
     </div>
 
